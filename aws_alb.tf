@@ -11,6 +11,11 @@ resource "aws_lb" "lb" {
     aws_subnet.public_subnet_1.id,
     aws_subnet.public_subnet_2.id,
   ]
+
+  access_logs {
+    bucket  = aws_s3_bucket.lb_logs.bucket
+    enabled = true
+  }
 }
 
 resource "aws_lb_listener" "https" {
@@ -23,16 +28,6 @@ resource "aws_lb_listener" "https" {
   }
   certificate_arn = aws_acm_certificate.cert.arn
 }
-
-# resource "aws_lb_listener" "http" {
-#   load_balancer_arn = aws_lb.lb.arn
-#   port              = "80"
-#   protocol          = "HTTP"
-#   default_action {
-#     target_group_arn = aws_lb_target_group.http.arn
-#     type             = "forward"
-#   }
-# }
 
 resource "aws_lb_target_group" "http" {
   name        = "${var.project}-tg"
@@ -81,5 +76,35 @@ resource "aws_security_group" "alb" {
 
   tags = {
     Name = "${var.project}-alb-sg"
+  }
+}
+
+resource "random_string" "s3_unique_key" {
+  length  = 6
+  upper   = false
+  lower   = true
+  number  = true
+  special = false
+}
+
+resource "aws_s3_bucket" "lb_logs" {
+  bucket = "${var.project}-alblogs-${random_string.s3_unique_key.result}"
+  policy = templatefile("json/access_log_policy.tpl.json",
+    {
+      bucket_name = "${var.project}-alblogs-${random_string.s3_unique_key.result}",
+      account_id  = "${data.aws_caller_identity.current.id}"
+    }
+  )
+
+  versioning {
+    enabled = false
+  }
+
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = 7
+    }
   }
 }
