@@ -17,9 +17,13 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.http.arn
+    target_group_arn = aws_lb_target_group.blue.arn
     container_name   = "${var.project}-container"
-    container_port   = "80"
+    container_port   = "8080"
+  }
+
+  deployment_controller {
+    type = "CODE_DEPLOY"
   }
 }
 
@@ -56,8 +60,8 @@ resource "aws_security_group" "container" {
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
-    from_port = 80
-    to_port   = 80
+    from_port = 8080
+    to_port   = 8080
     protocol  = "tcp"
     security_groups = [
       aws_security_group.alb.id,
