@@ -1,7 +1,7 @@
 [
   {
     "name": "${container_name}-container",
-    "image": "${account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/${repository_url}:${tag}",
+    "image": "${account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/${repository_url}",
     "cpu": 256,
     "memory": 512,
     "networkMode": "awsvpc",

@@ -47,8 +47,7 @@ resource "aws_ecs_task_definition" "main" {
     {
       account_id     = "${data.aws_caller_identity.current.id}",
       container_name = var.project,
-      repository_url = aws_ecr_repository.main.name,
-      tag            = var.image_tag
+      repository_url = aws_ecr_repository.main.name
     }
   )
 }
